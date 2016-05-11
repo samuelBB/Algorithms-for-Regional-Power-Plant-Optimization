@@ -9,19 +9,21 @@ class Plant:
         """
         self.p, self.b, self.t, self.out = p, b, 0, 0
 
+
 class fSS:
     """
     An object of this class represents an instance of the fractional Selective
     Shutdown (fSS) problem; includes greedy algorithm for the problem with
     auxiliary functions
     """
-    def __init__(self, C, K, plants, dist):
+    def __init__(self, C, K, plants, dist, name=''):
         """
         user supplies C, K, plant list, and plant dist. vector (distances between
         contiguous plants)
         """
         self.C, self.K, self.plants, self.N = C, K, plants, len(plants)
         self.e = self.get_effects(dist)
+        self.name = name
 
     def get_effects(self, dist):
         """
@@ -39,7 +41,7 @@ class fSS:
         """
         return self.plants[i].p * self.e[i, j]
 
-    def φ(self, i, j):
+    def Փ(self, i, j):
         """
         the potential of plant i relative to plant j, i.e., how much we can
         raise the temp. at plant i before meeting constraint C at plant j
@@ -64,10 +66,10 @@ class fSS:
             plant = self.plants[i]
 
             # highest temp. increase at plant i (first to meet a constraint)
-            plant.t = min(plant.b, min(self.φ(i, j) for j in range(i, self.N)))
+            plant.t = min(plant.b, min(self.Փ(i, j) for j in range(i, self.N)))
 
             for j in range(i, self.N):
-                if j in live[1:] and plant.t == self.φ(i, j): live.remove(j)
+                if j in live[1:] and plant.t == self.Փ(i, j): live.remove(j)
                 self.plants[j].out += plant.t / self.e[i, j]
 
         self._print_solution()
@@ -76,9 +78,10 @@ class fSS:
         """
         print optimal solution after running greedy
         """
-        print('temps: %s' % [r.t for r in self.plants])
+        print('~~%s~~' % self.name)
+        print('temps: ' + ', '.join('%.2f' % r.t for r in self.plants))
         profits = [r.t * r.p for r in self.plants]
-        print('profits: %s' % profits)
-        print('total: %s' % sum(profits))
+        print('power: ' + ', '.join('%.2f' % p for p in profits))
+        print('total: %.2f\n' % sum(profits))
 
 
